@@ -11,6 +11,8 @@ import com.ctre.phoenixpro.configs.MotorOutputConfigs;
 import com.ctre.phoenixpro.configs.TalonFXConfiguration;
 import com.ctre.phoenixpro.configs.TalonFXConfigurator;
 import com.ctre.phoenixpro.controls.PositionVoltage;
+import com.ctre.phoenixpro.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenixpro.controls.VoltageOut;
 import com.ctre.phoenixpro.hardware.CANcoder;
 import com.ctre.phoenixpro.hardware.TalonFX;
 import com.ctre.phoenixpro.signals.AbsoluteSensorRangeValue;
@@ -29,6 +31,7 @@ public class SwerveModule {
     private CANcoder m_encoder;
     private SwerveData m_data;
 
+    VoltageOut v = new VoltageOut(0);
 
     public SwerveModule(SwerveData _data){
         m_data = _data;
@@ -125,8 +128,11 @@ public class SwerveModule {
     /********************* Drive the modules ********************************/
     public void setDesiredState(SwerveModuleState _desiredState){
         SwerveModuleState state = SwerveModuleState.optimize(_desiredState, new Rotation2d(Math.toRadians(getSteerPosition())));
-        m_drive.setVoltage((state.speedMetersPerSecond/k.SWERVE.driveMax_MPS) * k.ROBOT.MaxBatteryVoltage);
         
+       // m_drive.setVoltage((state.speedMetersPerSecond/k.SWERVE.driveMax_MPS) * k.ROBOT.MaxBatteryVoltage);
+        m_drive.setControl(v.withEnableFOC(true).withOutput((state.speedMetersPerSecond/k.SWERVE.driveMax_MPS) * k.ROBOT.MaxBatteryVoltage));
+        
+       
     }
 
 }
